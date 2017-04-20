@@ -12,6 +12,18 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.PoolingByteArrayOutputStream;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
@@ -84,5 +96,44 @@ public class MovieFragment extends Fragment {
         }
 
         //TODO: send request for data from url
+
+        RequestQueue queue = VolleyRequestSingleton.getInstance(getActivity()).getRequestQueue();
+
+        Request movieRequest = new JsonObjectRequest(Request.Method.GET, urlString, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            Log.v(TAG, response.toString());
+                            String posterUrl = response.getString("Poster");
+                            fetchMoviePoster(posterUrl);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
+                }
+        );
+        queue.add(movieRequest);
+    }
+
+    private void fetchMoviePoster(String posterUrl) {
+        // need a queue
+        // RequestQueue queue = VolleyRequestSingleton.getInstance(getActivity()).getRequestQueue();
+        ImageLoader imageLoader = VolleyRequestSingleton.getInstance(getActivity())
+                .getImageLoader();
+
+        imageLoader.get(posterUrl, ImageLoader.getImageListener(movieImage, 0, 0));
+        // need a request
+
+        // send a request
+
+
+
     }
 }
